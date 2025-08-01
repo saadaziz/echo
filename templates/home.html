@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>RAG MVP - Home</title>
+</head>
+
+<body>
+    <h1>RAG MVP</h1>
+    <a href="/upload">Upload Document</a> |
+    <a href="/query-ui">Query</a>
+    <h2>Jobs</h2>
+    <table border="1">
+        <tr>
+            <th>Job ID</th>
+            <th>Filename</th>
+            <th>Status</th>
+            <th>Preview</th>
+        </tr>
+        {% for job in jobs %}
+        <tr>
+            <td>{{ job[0] }}</td>
+            <td>{{ job[1] }}</td>
+            <td>{{ job[2] }}</td>
+            <td style="max-width:300px;white-space:pre-wrap">
+                {{ (job[3] or '') | truncate(120) }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h3>Recent Logs</h3>
+    <div id="log-table"></div>
+    <script>
+        fetch('/logs').then(res => res.json()).then(logs => {
+            let html = `<table border="1" style="width:100%;font-size:smaller;">
+    <tr><th>Time</th><th>Service</th><th>Level</th><th>Message</th></tr>`;
+            for (const log of logs) {
+                html += `<tr>
+      <td>${new Date(log.created_at).toLocaleString()}</td>
+      <td>${log.service}</td>
+      <td>${log.level}</td>
+      <td>${log.message}</td>
+    </tr>`;
+            }
+            html += `</table>`;
+            document.getElementById("log-table").innerHTML = html;
+        });
+    </script>
+
+</body>
+
+</html>

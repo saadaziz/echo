@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Query RAG</title>
+</head>
+
+<body>
+    <h1>Ask a Question</h1>
+    <form method="POST">
+        <label for="question">Your Question:</label>
+        <input type="text" name="question" id="question" value="{{ question or '' }}" style="width:400px;" required>
+        <label for="model">Model:</label>
+        <select name="model" id="model">
+            <option value="ollama" {% if model=="ollama" or not model %}selected{% endif %}>Ollama (Local LLM)</option>
+            <option value="openai" {% if model=="openai" %}selected{% endif %}>OpenAI (Cloud, GPT-3.5/4)</option>
+        </select>
+        <button type="submit">Ask</button>
+    </form>
+
+    {% if answer %}
+    <h2>Answer:</h2>
+    <div style="border:1px solid #ccc; padding:10px; max-width:700px; white-space:pre-wrap;">{{ answer }}</div>
+    {% endif %}
+    <a href="/">Back to Home</a>
+</body>
+
+</html>
