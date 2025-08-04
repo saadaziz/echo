@@ -1,28 +1,291 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Query RAG</title>
+  <title>Query RAG – Echo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://saadaziz.com/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a1a2e, #301b3f);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      color: #f0f0f0;
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .query-outer {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 90vh;
+      padding-top: 80px;
+      /* enough for the fixed header */
+    }
+
+    .query-container {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      background: rgba(34, 32, 64, 0.98);
+      border-radius: 18px;
+      box-shadow: 0 2px 32px #18173370;
+      padding: 2.5rem 2rem 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .query-title {
+      font-size: 2.1rem;
+      margin-bottom: 1.3rem;
+      text-align: center;
+      font-weight: 800;
+      letter-spacing: 0.1px;
+      color: #bfaee3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6em;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.7rem;
+    }
+
+    label {
+      font-size: 1.07em;
+      color: #e2deee;
+      margin-bottom: 0.4em;
+      font-weight: 500;
+    }
+
+    .query-row {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      flex: 2;
+      padding: 0.89em 1em;
+      border: 1.5px solid #393977;
+      background: #232244;
+      color: #f0f0f0;
+      border-radius: 36px;
+      font-size: 1.09em;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #a78bfa;
+      outline: none;
+      background: #262760;
+    }
+
+    select {
+      flex: 1;
+      min-width: 185px;
+      padding: 0.77em 1em;
+      border-radius: 36px;
+      border: 1.2px solid #393977;
+      background: #292960;
+      color: #f0f0f0;
+      font-size: 1.07em;
+      font-weight: 600;
+      transition: border 0.13s;
+    }
+
+    button[type="submit"] {
+      padding: 0.82em 2.3em;
+      border-radius: 36px;
+      background: linear-gradient(90deg, #7b68ee 70%, #a78bfa 100%);
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      font-size: 1.08em;
+      cursor: pointer;
+      box-shadow: 0 2px 10px #a78bfa22;
+      transition: background 0.15s, transform 0.13s;
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      margin-left: 0.6em;
+    }
+
+    button[type="submit"]:hover,
+    button[type="submit"]:focus {
+      background: #a78bfa;
+      transform: translateY(-2px) scale(1.025);
+    }
+
+    .answer-section {
+      margin-top: 2.3rem;
+    }
+
+    .answer-label {
+      font-size: 1.14em;
+      font-weight: 700;
+      color: #a78bfa;
+      margin-bottom: 0.4em;
+    }
+
+    .answer-box {
+      border: 1.5px solid #7b68ee55;
+      border-radius: 11px;
+      background: rgba(44, 39, 76, 0.94);
+      color: #f0f0f0;
+      font-size: 1.07em;
+      padding: 1.1em 1.3em;
+      white-space: pre-wrap;
+      max-width: 700px;
+      word-break: break-word;
+      margin-bottom: 1em;
+      box-shadow: 0 1px 4px #7b68ee11;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 1.6rem;
+      color: #a78bfa;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.13s;
+    }
+
+    .back-link:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    /* Username/logout in header */
+    .user-info-bar {
+      text-align: right;
+      margin-bottom: 0.2em;
+      font-size: 1em;
+      color: #fff7d7;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .user-info-bar img {
+      vertical-align: middle;
+      margin-right: 8px;
+      border-radius: 50%;
+    }
+
+    .user-info-bar a {
+      color: #a78bfa;
+      margin-left: 0.8em;
+      font-weight: 500;
+    }
+
+    .user-info-bar a:hover {
+      color: #fff;
+    }
+
+    @media (max-width: 800px) {
+      .query-outer {
+        padding-top: 100px;
+      }
+
+      .query-container {
+        padding: 1.5rem 0.3rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .query-outer {
+        padding-top: 85px;
+      }
+
+      .query-container {
+        padding: 1.2rem 0.1rem;
+      }
+
+      .query-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        margin-left: 0;
+        justify-content: center;
+      }
+
+      select {
+        min-width: 100px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <h1>Ask a Question</h1>
-    <form method="POST">
-        <label for="question">Your Question:</label>
-        <input type="text" name="question" id="question" value="{{ question or '' }}" style="width:400px;" required>
-        <label for="model">Model:</label>
-        <select name="model" id="model">
-            <option value="ollama" {% if model=="ollama" or not model %}selected{% endif %}>Ollama (Local LLM)</option>
-            <option value="openai" {% if model=="openai" %}selected{% endif %}>OpenAI (Cloud, GPT-3.5/4)</option>
-        </select>
-        <button type="submit">Ask</button>
-    </form>
-
-    {% if answer %}
-    <h2>Answer:</h2>
-    <div style="border:1px solid #ccc; padding:10px; max-width:700px; white-space:pre-wrap;">{{ answer }}</div>
-    {% endif %}
-    <a href="/">Back to Home</a>
+  <header id="header">
+    <div class="container" style="max-width:1400px;">
+      <div class="user-info-bar">
+        {% if user %}
+        {% if user.picture %}
+        <img src="{{ user.picture }}" width="28" height="28" alt="profile">
+        {% endif %}
+        <span>{{ user.sub }}</span>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+      </div>
+      <div class="navbar">
+        <nav>
+          <div class="navbar-logo">
+            <a href="/" style="text-decoration: none;">
+              <span class="brand-name">SAAD AZIZ - AI ENGINEERING</span>
+            </a>
+          </div>
+          <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/upload">Upload Docs</a></li>
+            <li><a href="/query-ui">Query</a></li>
+            <li><a href="/logs">Logs</a></li>
+          </ul>
+          <div class="mobile-menu"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <div class="query-outer">
+    <div class="query-container">
+      <div class="query-title"><i class="fa fa-brain"></i> Ask a Question</div>
+      <form method="POST">
+        <div>
+          <label for="question">Your Question:</label>
+          <div class="query-row">
+            <input type="text" name="question" id="question" value="{{ question or '' }}" required
+              placeholder="E.g. What is RAG?">
+            <select name="model" id="model">
+              <option value="ollama" {% if model=="ollama" or not model %}selected{% endif %}>Ollama (Local LLM)
+              </option>
+              <option value="openai" {% if model=="openai" %}selected{% endif %}>OpenAI (Cloud, GPT-3.5/4)</option>
+            </select>
+            <button type="submit"><i class="fa fa-paper-plane"></i> Ask</button>
+          </div>
+        </div>
+      </form>
+      {% if answer %}
+      <div class="answer-section">
+        <div class="answer-label"><i class="fa fa-robot"></i> Answer:</div>
+        <div class="answer-box">{{ answer }}</div>
+      </div>
+      {% endif %}
+      <a class="back-link" href="/"><i class="fa fa-arrow-left"></i> Back to Home</a>
+    </div>
+  </div>
 </body>
 
 </html>

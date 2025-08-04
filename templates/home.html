@@ -1,52 +1,323 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>RAG MVP - Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Echo – Home</title>
+    <link rel="stylesheet" href="http://saadaziz.com/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        main.container {
+            padding-top: 190px;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(26, 26, 46, 0.85);
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 1rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.09);
+        }
+
+        .log-table thead tr {
+            background: linear-gradient(90deg, #301b3f 70%, #7b68ee 100%);
+            color: #f0f0f0;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .log-table th,
+        .log-table td {
+            padding: 0.9em 1.1em;
+            text-align: left;
+            border-bottom: 1px solid #2c2747;
+        }
+
+        .log-table tbody tr:nth-child(even) {
+            background: rgba(30, 30, 55, 0.96);
+        }
+
+        .log-table tbody tr:hover {
+            background: #7b68ee22;
+        }
+
+        .log-table td span {
+            font-family: "Fira Mono", "Consolas", monospace;
+            font-size: 0.98em;
+        }
+
+        .log-table td.level-error {
+            color: #ff7276;
+            font-weight: 700;
+        }
+
+        .log-table td.level-warn {
+            color: #ffd166;
+            font-weight: 700;
+        }
+
+        .log-table td.level-info {
+            color: #7b68ee;
+            font-weight: 700;
+        }
+
+        .log-table td.level-debug {
+            color: #6ad99f;
+            font-weight: 700;
+        }
+
+        @media (max-width: 650px) {
+            .log-table thead {
+                display: none;
+            }
+
+            .log-table,
+            .log-table tbody,
+            .log-table tr,
+            .log-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .log-table td {
+                padding: 1em 0.6em;
+                border-bottom: 1px solid #2c2747;
+            }
+
+            .log-table tr {
+                margin-bottom: 1em;
+            }
+
+            .log-table td:before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: #a78bfa;
+                display: block;
+                margin-bottom: 0.4em;
+                font-size: 0.97em;
+            }
+        }
+
+        .jobs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(26, 26, 46, 0.90);
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 1rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.09);
+        }
+
+        .jobs-table thead tr {
+            background: linear-gradient(90deg, #16213e 70%, #7b68ee 100%);
+            color: #f0f0f0;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .jobs-table th,
+        .jobs-table td {
+            padding: 0.8em 1em;
+            text-align: left;
+            border-bottom: 1px solid #2c2747;
+        }
+
+        .jobs-table tbody tr:nth-child(even) {
+            background: rgba(30, 30, 55, 0.94);
+        }
+
+        .jobs-table tbody tr:hover {
+            background: #7b68ee22;
+        }
+
+        .jobs-table td.preview-cell {
+            font-family: "Fira Mono", "Consolas", monospace;
+            font-size: 0.97em;
+            max-width: 350px;
+            overflow-wrap: anywhere;
+            opacity: 0.9;
+        }
+
+        /* Status badge colors */
+        .status-badge {
+            display: inline-block;
+            font-size: 0.92em;
+            font-weight: 700;
+            padding: 0.2em 0.8em;
+            border-radius: 16px;
+            color: #fff;
+            background: #7b68ee;
+            letter-spacing: 0.02em;
+        }
+
+        .status-badge.queued {
+            background: #fdab44;
+            color: #181c2f;
+        }
+
+        .status-badge.running {
+            background: #3498db;
+        }
+
+        .status-badge.complete {
+            background: #27ae60;
+        }
+
+        .status-badge.failed {
+            background: #ff7276;
+        }
+
+        @media (max-width: 650px) {
+            .jobs-table thead {
+                display: none;
+            }
+
+            .jobs-table,
+            .jobs-table tbody,
+            .jobs-table tr,
+            .jobs-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .jobs-table td {
+                padding: 1em 0.6em;
+                border-bottom: 1px solid #2c2747;
+            }
+
+            .jobs-table tr {
+                margin-bottom: 1em;
+            }
+
+            .jobs-table td:before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: #7b68ee;
+                display: block;
+                margin-bottom: 0.3em;
+                font-size: 0.96em;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h1>RAG MVP</h1>
-    <a href="/upload">Upload Document</a> |
-    <a href="/query-ui">Query</a>
-    <h2>Jobs</h2>
-    <table border="1">
-        <tr>
-            <th>Job ID</th>
-            <th>Filename</th>
-            <th>Status</th>
-            <th>Preview</th>
-        </tr>
-        {% for job in jobs %}
-        <tr>
-            <td>{{ job[0] }}</td>
-            <td>{{ job[1] }}</td>
-            <td>{{ job[2] }}</td>
-            <td style="max-width:300px;white-space:pre-wrap">
-                {{ (job[3] or '') | truncate(120) }}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    <h3>Recent Logs</h3>
-    <div id="log-table"></div>
-    <script>
-        fetch('/logs').then(res => res.json()).then(logs => {
-            let html = `<table border="1" style="width:100%;font-size:smaller;">
-    <tr><th>Time</th><th>Service</th><th>Level</th><th>Message</th></tr>`;
-            for (const log of logs) {
-                html += `<tr>
-      <td>${new Date(log.created_at).toLocaleString()}</td>
-      <td>${log.service}</td>
-      <td>${log.level}</td>
-      <td>${log.message}</td>
-    </tr>`;
-            }
-            html += `</table>`;
-            document.getElementById("log-table").innerHTML = html;
-        });
-    </script>
+    <header id="header">
+        <div class="container">
+            {% if user %}
+            <div style="text-align: right; margin-bottom: 1rem;">
+                {% if user.picture %}
+                <img src="{{ user.picture }}" style="width:32px;height:32px;border-radius:50%;">
+                {% endif %}
+                <strong>{{ user.sub }}</strong>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+            {% else %}
+            <div style="text-align: right; margin-bottom: 1rem;">
+                <a href="{{ url_for('login') }}">Login</a>
+            </div>
+            {% endif %}
+            <div class="navbar">
+                <nav>
+                    <div class="navbar-logo">
+                        <a href="/" style="text-decoration: none;">
+                            <span class="brand-name">SAAD AZIZ - AI ENGINEERING</span>
+                        </a>
+                    </div>
+                    <ul class="nav-links">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/upload">Upload Docs</a></li>
+                        <li><a href="/query-ui">Query</a></li>
+                        <li><a href="/logs">Logs</a></li>
+                    </ul>
+                    <div class="mobile-menu"><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                    </div>
+            </div>
+            </nav>
+        </div>
+    </header>
 
+    <main class="container">
+        <h1>RAG MVP – Job Queue</h1>
+        <nav style="margin-bottom: 2rem;">
+            <a href="/upload"><i class="fa fa-upload"></i> Upload Document</a>
+            <a href="/query-ui"><i class="fa fa-question-circle"></i> Query</a>
+            <a href="/logs"><i class="fa fa-file-alt"></i> Logs</a>
+        </nav>
+        <section>
+            <h2>Jobs</h2>
+            <table class="jobs-table">
+                <thead>
+                    <tr>
+                        <th>Job ID</th>
+                        <th>Filename</th>
+                        <th>Status</th>
+                        <th>Preview</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr>
+                        <td data-label="Job ID">{{ job[0] }}</td>
+                        <td data-label="Filename">{{ job[1] }}</td>
+                        <td data-label="Status">
+                            <span class="status-badge {{ job[2]|lower }}">{{ job[2]|capitalize }}</span>
+                        </td>
+                        <td data-label="Preview" class="preview-cell">{{ (job[3] or '') | truncate(120) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Recent Logs</h2>
+            <div id="log-table" style="overflow-x:auto;"></div>
+        </section>
+
+        <script>
+            function fetchLogs() {
+                fetch('/logs.json')
+                    .then(res => res.json())
+                    .then(logs => {
+                        let html = `<table class="log-table">
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Service</th>
+                                <th>Level</th>
+                                <th>Message</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            ${logs.map(log => `
+                                <tr>
+                                <td data-label="Date"><span>${log.created_at}</span></td>
+                                <td data-label="Service">${log.service}</td>
+                                <td data-label="Level" class="level-${log.level.toLowerCase()}">${log.level}</td>
+                                <td data-label="Message" style="white-space:pre-line">${log.message}</td>
+                                </tr>
+                            `).join('')}
+                            </tbody>
+                        </table>`;
+                        document.getElementById('log-table').innerHTML = html;
+                    });
+            }
+            fetchLogs();
+            setInterval(fetchLogs, 30000);
+        </script>
+    </main>
 </body>
 
 </html>

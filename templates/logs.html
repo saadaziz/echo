@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Logs Viewer</title>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/2.0.0/modern-normalize.min.css">
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: #181e27;
+            color: #eee;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 3em auto;
+            padding: 2em;
+            background: #222845;
+            border-radius: 12px;
+        }
+
+        h1 {
+            margin-bottom: 1em;
+        }
+
+        .warning {
+            color: #fff;
+            background: #be2d2d;
+            padding: 0.7em 1.2em;
+            border-radius: 8px;
+            margin-bottom: 2em;
+        }
+
+        .controls {
+            margin-bottom: 1.3em;
+            display: flex;
+            gap: 1em;
+            flex-wrap: wrap;
+        }
+
+        .controls input,
+        .controls select {
+            padding: 0.3em 0.7em;
+            border-radius: 5px;
+            border: 1px solid #444;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 0.6em 0.9em;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        th {
+            cursor: pointer;
+            background: #202437;
+        }
+
+        tr:hover {
+            background: #2d3250;
+        }
+
+        .level-INFO {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .level-WARN {
+            color: #ffb300;
+            font-weight: bold;
+        }
+
+        .level-ERROR {
+            color: #e53935;
+            font-weight: bold;
+        }
+
+        .level-DEBUG {
+            color: #42a5f5;
+            font-weight: bold;
+        }
+
+        .log-date {
+            font-family: monospace;
+        }
+
+        .nowrap {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>System Logs</h1>
+        {% if logs_public %}
+        <div class="warning">
+            ⚠️ <b>WARNING:</b> Logs are <u>temporarily PUBLIC</u>. Remove public access before going live.
+        </div>
+        {% endif %}
+        <div class="controls">
+            <input type="text" id="search" placeholder="Search logs..." oninput="filterLogs()">
+            <select id="levelFilter" onchange="filterLogs()">
+                <option value="">All Levels</option>
+                <option value="INFO">INFO</option>
+                <option value="WARN">WARN</option>
+                <option value="ERROR">ERROR</option>
+                <option value="DEBUG">DEBUG</option>
+            </select>
+            <select id="serviceFilter" onchange="filterLogs()">
+                <option value="">All Services</option>
+                {% for log in logs|unique(attribute='service') %}
+                <option value="{{ log.service }}">{{ log.service }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <table id="logTable">
+            <thead>
+                <tr>
+                    <th onclick="sortLogs('created_at')">Date</th>
+                    <th onclick="sortLogs('service')">Service</th>
+                    <th onclick="sortLogs('level')">Level</th>
+                    <th onclick="sortLogs('message')">Message</th>
+                </tr>
+            </thead>
+            <tbody id="logBody">
+                {% for log in logs %}
+                <tr>
+                    <td class="log-date nowrap">{{ log.created_at|datetime_fmt }}</td>
+                    <td>{{ log.service }}</td>
+                    <td class="level-{{ log.level }}">{{ log.level }}</td>
+                    <td>
+                        {% if log.message.startswith("{") or log.message.startswith("[") %}
+                        <pre
+                            style="white-space: pre-wrap; word-break: break-all; background: #1c1d2b; color: #a8ff60; padding: 7px; border-radius: 8px; font-size: 0.97em;">
+                    {{ log.message | tojson(indent=2) }}
+                    </pre>
+                        {% else %}
+                        {{ log.message }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        let sortDir = 1, sortKey = "created_at";
+        function filterLogs() {
+            const search = document.getElementById("search").value.toLowerCase();
+            const level = document.getElementById("levelFilter").value;
+            const service = document.getElementById("serviceFilter").value;
+            const rows = document.querySelectorAll("#logBody tr");
+            rows.forEach(row => {
+                const cells = row.children;
+                const matchesSearch = Array.from(cells).some(td =>
+                    td.textContent.toLowerCase().includes(search)
+                );
+                const matchesLevel = !level || cells[2].textContent === level;
+                const matchesService = !service || cells[1].textContent === service;
+                row.style.display = (matchesSearch && matchesLevel && matchesService) ? "" : "none";
+            });
+        }
+        function sortLogs(key) {
+            const idxMap = { "created_at": 0, "service": 1, "level": 2, "message": 3 };
+            const idx = idxMap[key];
+            let rows = Array.from(document.querySelectorAll("#logBody tr"));
+            rows.sort((a, b) => {
+                let ta = a.children[idx].textContent, tb = b.children[idx].textContent;
+                if (key === "created_at") {
+                    // Compare as date
+                    ta = Date.parse(ta.replace(/(\w{3}) (\d{2}),/, "$1 20$2,")); // crude, works for common formats
+                    tb = Date.parse(tb.replace(/(\w{3}) (\d{2}),/, "$1 20$2,"));
+                }
+                return (ta > tb ? 1 : ta < tb ? -1 : 0) * sortDir;
+            });
+            rows.forEach(r => document.getElementById("logBody").appendChild(r));
+            sortDir = -sortDir;
+            sortKey = key;
+        }
+    </script>
+</body>
+
+</html>

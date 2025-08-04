@@ -21,3 +21,6 @@ Thumbs.db
 # Document storage
 doc_store/*
 !doc_store/.gitkeep
+
+# Observability
+*.log

@@ -1,15 +1,223 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Upload Document</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Echo – Upload Document</title>
+    <link rel="stylesheet" href="https://saadaziz.com/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #181a20, #291f41 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .upload-center {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 92vh;
+            padding-top: 110px;
+        }
+
+        .upload-card {
+            max-width: 480px;
+            width: 100%;
+            padding: 2.3rem 2.2rem 2.3rem 2.2rem;
+            background: rgba(38, 34, 54, 0.93);
+            border-radius: 22px;
+            box-shadow: 0 12px 32px 0 #241a3680, 0 2px 8px #0002;
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            border: 1.5px solid #2d2a4a;
+            margin: 0 8px;
+            position: relative;
+        }
+
+        .upload-title {
+            font-size: 2.1rem;
+            font-weight: 900;
+            letter-spacing: 0.08rem;
+            text-align: center;
+            color: #a78bfa;
+            margin-bottom: 1.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7em;
+            text-shadow: 0 2px 16px #7b68ee40;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.7rem;
+            margin-bottom: 0.8rem;
+        }
+
+        input[type="file"] {
+            border: 1.7px solid #3a3375;
+            border-radius: 11px;
+            background: rgba(44, 39, 76, 0.92);
+            color: #fff8;
+            padding: 1.07em 1em;
+            font-size: 1.07em;
+            transition: border 0.15s, background 0.12s;
+            margin-bottom: 0.5em;
+            cursor: pointer;
+        }
+
+        input[type="file"]:focus {
+            border-color: #a78bfa;
+            background: #221e39;
+            outline: none;
+        }
+
+        input[type="submit"] {
+            background: linear-gradient(90deg, #7b68ee 65%, #a78bfa 100%);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.12em;
+            border-radius: 33px;
+            padding: 0.84em 2.2em;
+            box-shadow: 0 2px 10px #a78bfa22;
+            transition: background 0.14s, transform 0.11s;
+            cursor: pointer;
+            margin-top: 0.2em;
+        }
+
+        input[type="submit"]:hover,
+        input[type="submit"]:focus {
+            background: linear-gradient(90deg, #a78bfa 80%, #c3b5f9 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+
+        .msg {
+            color: #4cafef;
+            font-weight: 700;
+            background: #2c2340c2;
+            border-radius: 7px;
+            padding: 0.8em 1.1em;
+            margin-bottom: 0.4em;
+            text-align: center;
+            letter-spacing: 0.04em;
+            font-size: 1.05em;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1.2rem;
+            color: #bda5ee;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1em;
+            transition: color 0.13s;
+            text-align: left;
+        }
+
+        .back-link:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 650px) {
+            .upload-card {
+                padding: 1.2rem 0.7rem;
+            }
+
+            .upload-title {
+                font-size: 1.36rem;
+            }
+
+            .upload-center {
+                padding-top: 90px;
+            }
+        }
+
+        /* Hide default nav from your code since we use your standard navbar below */
+        nav,
+        header {
+            position: static;
+            background: none;
+            box-shadow: none;
+        }
+
+        .user-bar {
+            display: none !important;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Upload Document</h1>
-    {% if msg %}<p style="color: green;">{{ msg }}</p>{% endif %}
-    <form method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <input type="submit" value="Upload">
-    </form>
-    <a href="/">Back to Home</a>
+    <!-- Your Sitewide Premium Header/Navbar (matches home & query) -->
+    <header id="header">
+        <div class="container" style="max-width:1400px;">
+            <div class="user-info-bar">
+                {% if user %}
+                {% if user.picture %}
+                <img src="{{ user.picture }}" width="28" height="28" alt="profile">
+                {% endif %}
+                <span style="color:#fffdd1;font-weight:700;">{{ user.sub }}</span>
+                <a href="{{ url_for('logout') }}" style="margin-left:1rem;">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                {% endif %}
+            </div>
+            <div class="navbar">
+                <nav>
+                    <div class="navbar-logo">
+                        <a href="/" style="text-decoration: none;">
+                            <span class="brand-name">SAAD AZIZ - AI ENGINEERING</span>
+                        </a>
+                    </div>
+                    <ul class="nav-links">
+                        <li><a href="{{ url_for('home') }}">Home</a></li>
+                        <li><a href="{{ url_for('upload_page') }}" class="active">Upload Docs</a></li>
+                        <li><a href="{{ url_for('query_ui') }}">Query</a></li>
+                        <li><a href="{{ url_for('logs') }}">Logs</a></li>
+                    </ul>
+                    <div class="mobile-menu"><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="upload-center">
+        <div class="upload-card">
+            <div class="upload-title"><i class="fa fa-upload"></i> Upload Document</div>
+            {% if msg %}
+            <div class="msg">{{ msg }}</div>
+            {% endif %}
+            <form method="post" enctype="multipart/form-data">
+                <input type="file" name="file" required>
+                <input type="submit" value="Upload">
+            </form>
+            <a href="{{ url_for('home') }}" class="back-link"><i class="fa fa-arrow-left"></i> Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Mobile nav handler if you use it globally -->
+    <script>
+        const mobileMenu = document.querySelector(".mobile-menu");
+        const navLinks = document.querySelector(".nav-links");
+        if (mobileMenu && navLinks) {
+            mobileMenu.addEventListener("click", () => {
+                mobileMenu.classList.toggle("active");
+                navLinks.classList.toggle("active");
+            });
+            navLinks.querySelectorAll("a").forEach(link => {
+                link.addEventListener("click", () => {
+                    mobileMenu.classList.remove("active");
+                });
+            });
+        }
+    </script>
 </body>
+
 </html>
